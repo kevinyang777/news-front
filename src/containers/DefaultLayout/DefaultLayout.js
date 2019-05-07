@@ -20,26 +20,42 @@ import navigation from '../../_nav';
 import routes from '../../routes';
 
 const DefaultAside = React.lazy(() => import('./DefaultAside'));
-const DefaultFooter = React.lazy(() => import('./DefaultFooter'));
-const DefaultHeader = React.lazy(() => import('./DefaultHeader'));
 
 class DefaultLayout extends Component {
 
   loading = () => <div className="animated fadeIn pt-1 text-center">Loading...</div>
 
-  signOut(e) {
-    e.preventDefault()
-    this.props.history.push('/login')
+  navChecker = () =>{
+    if(localStorage.getItem('fake-detik-authorization')){
+    var nav=navigation;
+    var newsManagement={
+      name: 'News Management',
+      url: '/newsmanagement',
+      icon: 'icon-pencil',
+    }
+    nav.items.push(newsManagement)
+    var userManagement={
+      name: 'User Management',
+      url: '/usermanagement',
+      icon: 'icon-pencil',
+    }
+    nav.items.push(userManagement)
+    var createNews={
+      name: 'Create News',
+      url: '/createnews',
+      icon: 'icon-pencil',
+    }
+    nav.items.push(createNews)
+  }
+  }
+
+  componentDidMount(){
+    this.navChecker()
   }
 
   render() {
     return (
       <div className="app">
-        <AppHeader fixed>
-          <Suspense  fallback={this.loading()}>
-            <DefaultHeader onLogout={e=>this.signOut(e)}/>
-          </Suspense>
-        </AppHeader>
         <div className="app-body">
           <AppSidebar fixed display="lg">
             <AppSidebarHeader />
@@ -51,7 +67,6 @@ class DefaultLayout extends Component {
             <AppSidebarMinimizer />
           </AppSidebar>
           <main className="main">
-            <AppBreadcrumb appRoutes={routes}/>
             <Container fluid>
               <Suspense fallback={this.loading()}>
                 <Switch>
@@ -67,7 +82,7 @@ class DefaultLayout extends Component {
                         )} />
                     ) : (null);
                   })}
-                  <Redirect from="/" to="/dashboard" />
+                  <Redirect from="/" to="/news" />
                 </Switch>
               </Suspense>
             </Container>
@@ -78,11 +93,6 @@ class DefaultLayout extends Component {
             </Suspense>
           </AppAside>
         </div>
-        <AppFooter>
-          <Suspense fallback={this.loading()}>
-            <DefaultFooter />
-          </Suspense>
-        </AppFooter>
       </div>
     );
   }
