@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { getUsers } from "../../utils/api";
-import { Table } from "reactstrap";
+import { getUsers, destoryUser, patchUser } from "../../utils/api";
+import { Table, Button } from "reactstrap";
 
 class NewsManagement extends Component {
   constructor(props) {
@@ -40,7 +40,30 @@ class NewsManagement extends Component {
                   <td>{user.email}</td>
                   <td>{user.role}</td>
                   <td>{user.deletedAt}</td>
-                  <td>asd</td>
+                  <td>
+                    <Button
+                      onClick={e => {
+                        e.preventDefault();
+                        patchUser(user.id, {
+                          id: user.id,
+                          role: user.role === "user" ? "admin" : "user",
+                          deletedAt: ""
+                        }).then(res => window.location.reload());
+                      }}
+                    >
+                      Update Role
+                    </Button>
+                    <Button
+                      onClick={e => {
+                        e.preventDefault();
+                        destoryUser(user.id).then(res =>
+                          window.location.reload()
+                        );
+                      }}
+                    >
+                      Delete
+                    </Button>
+                  </td>
                 </tr>
               );
             })}

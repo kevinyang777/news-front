@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import { getNews } from "../../utils/api";
 import { Link } from 'react-router-dom'
 import {Card, CardBody, CardHeader} from 'reactstrap'
+import { convertFromRaw } from "draft-js";
+import {stateToHTML} from 'draft-js-export-html'; 
 
 class News extends Component {
   constructor(props) {
@@ -34,7 +36,7 @@ class News extends Component {
               {news.newsHeader}
               </CardHeader>
               <CardBody>
-              {news.newsContent}
+              <div dangerouslySetInnerHTML={{ __html: stateToHTML(convertFromRaw(JSON.parse(news.newsContent)))}}/> 
               </CardBody>
             </Card>
               </div>

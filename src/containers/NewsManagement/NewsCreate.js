@@ -1,7 +1,14 @@
 import React, { Component } from "react";
-import { createNews } from "../../utils/api";
+import { createNews, patchNews } from "../../utils/api";
 import { Editor } from "react-draft-wysiwyg";
-import { EditorState, convertToRaw } from "draft-js";
+import {
+  EditorState,
+  convertToRaw,
+  convertFromRaw,
+  convertFromHTML,
+  ContentState,
+  compositeDecorator
+} from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import { Input, Button } from "reactstrap";
 
@@ -14,15 +21,38 @@ class NewsManagement extends Component {
     };
   }
 
+  componentDidMount() {
+    const {
+      updateData: { newsHeader = "", newsContent = "" } = {}
+    } = this.props;
+    if (this.props.updateData !== undefined) {
+      const state = convertFromRaw(JSON.parse(newsContent));
+      this.setState({
+        header: newsHeader,
+        editorState: EditorState.createWithContent(state, compositeDecorator)
+      });
+    }
+  }
+
   handleCreateNews = e => {
     e.preventDefault();
     const { header } = this.state;
-    createNews({
-      newsHeader: header,
-      newsContent: this.saveEditorToDB(),
-      status: "published"
-    }).then(res=>console.log(res)
-    ).catch(err=>console.log(err))
+    if (this.props.updateData === undefined) {
+      createNews({
+        newsHeader: header,
+        newsContent: this.saveEditorToDB(),
+        status: "published"
+      })
+        .then(res => (window.location.hash = "/newsmanagement"))
+        .catch(err => console.log(err));
+    } else {
+      const { id = "", status = "" } = this.props.updateData;
+      patchNews(id, {
+        newsHeader: header,
+        newsContent: this.saveEditorToDB(),
+        status: status
+      }).then(res => window.location.reload());
+    }
   };
 
   onHeaderChange = e => {
@@ -39,17 +69,23 @@ class NewsManagement extends Component {
   };
 
   saveEditorToDB = () => {
-    const blocks = convertToRaw(this.state.editorState.getCurrentContent()).blocks;
-    const value = blocks.map(block => (!block.text.trim() && '\n') || block.text).join('\n');
-    return value
+    const converted = convertToRaw(this.state.editorState.getCurrentContent());
+    return JSON.stringify(converted);
   };
 
   render() {
     return (
       <div className="container">
-        <h1>Create News</h1>
+        {this.props.updateData === undefined ? (
+          <h1>Create News</h1>
+        ) : (
+          <h1>Update News</h1>
+        )}
         <p>News Header</p>
-        <Input onChange={e => this.onHeaderChange(e)} />
+        <Input
+          onChange={e => this.onHeaderChange(e)}
+          value={this.state.header}
+        />
         <p>News Content</p>
         <Editor
           editorState={this.state.editorState}

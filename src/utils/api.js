@@ -62,6 +62,16 @@ export const getUsers = async (page = 1, limit = 10) => {
   return api.get(`/users?page=${page}&limit=${limit}`)
 }
 
+export const patchUser = async (id, payload = {}) => {
+  await verifyJwtExpiration()
+  return api.patch(`/users/${id}`, { ...payload })
+}
+
+export const destoryUser = async (id) => {
+  await verifyJwtExpiration()
+  return api.delete(`/users/${id}`)
+}
+
 //News endpoint
 export const getNews = async (page = 1, limit = 10) => {
   await verifyJwtExpiration()
